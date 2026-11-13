@@ -6,7 +6,7 @@ on:
       stream_url:
         description: 'M3U8 Stream Link'
         required: true
-        default: 'https://livetv.shamon-cable.net:8443/Duronto/index.m3u8'
+        default: 'https://toffee.aliflaila.live/channel/33.m3u8'
       minutes:
         description: 'Koto minute record korben?'
         required: true
