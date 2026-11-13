@@ -33,6 +33,9 @@ jobs:
 
           timeout -s INT "$MAX_WAIT" ffmpeg -y \
             -user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+            -extension_picky 0 \
+            -allowed_extensions ALL \
+            -allowed_segment_extensions ALL \
             -i "$STREAM_URL" \
             -t "$SECONDS_TO_RECORD" \
             -c copy \
@@ -43,7 +46,7 @@ jobs:
             rm -f "raw.ts"
             ls -lh
           else
-            echo "Stream connect hoyni! Somvoboto ei link-ti Bangladesh/ISP-er baire theke block kora."
+            echo "Stream connect hoyni ba kono video data asheni!"
             exit 1
           fi
 
