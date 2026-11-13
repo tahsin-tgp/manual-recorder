@@ -1,0 +1,57 @@
+name: Manual Record Live Stream
+
+on:
+  workflow_dispatch:
+    inputs:
+      stream_url:
+        description: 'M3U8 Stream Link'
+        required: true
+        default: 'https://livetv.shamon-cable.net:8443/Duronto/index.m3u8'
+      minutes:
+        description: 'Koto minute record korben?'
+        required: true
+        default: '5'
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FFmpeg
+        run: |
+          if ! command -v ffmpeg &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y ffmpeg
+          fi
+
+      - name: Record Full HD Stream
+        env:
+          STREAM_URL: ${{ github.event.inputs.stream_url }}
+          MINUTES: ${{ github.event.inputs.minutes }}
+        run: |
+          SECONDS_TO_RECORD=$((MINUTES * 60))
+          MAX_WAIT=$((SECONDS_TO_RECORD + 60))
+          FILENAME="stream_$(date +%Y%m%d_%H%M%S).mp4"
+
+          timeout -s INT "$MAX_WAIT" ffmpeg -y \
+            -user_agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" \
+            -i "$STREAM_URL" \
+            -t "$SECONDS_TO_RECORD" \
+            -c copy \
+            "raw.ts" || true
+
+          if [ -f "raw.ts" ] && [ -s "raw.ts" ]; then
+            ffmpeg -y -i "raw.ts" -c copy "$FILENAME" || mv "raw.ts" "stream_$(date +%Y%m%d_%H%M%S).ts"
+            rm -f "raw.ts"
+            ls -lh
+          else
+            echo "Stream connect hoyni! Somvoboto ei link-ti Bangladesh/ISP-er baire theke block kora."
+            exit 1
+          fi
+
+      - name: Upload Video
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorded-video
+          path: |
+            *.mp4
+            *.ts
+          retention-days: 3
